@@ -8,7 +8,24 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 1,
   workers: 1,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    [
+      'allure-playwright',
+      {
+        resultsDir: 'allure-results',
+        detail: true,
+        suiteTitle: false,
+        environmentInfo: {
+          'Base URL': BASE_URL,
+          Browser: 'Chromium',
+          Framework: 'Playwright',
+          Target: 'OrangeHRM Live Demo',
+        },
+      },
+    ],
+  ],
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',

@@ -2,6 +2,8 @@
 
 This repository contains a Playwright + TypeScript regression suite for the live OrangeHRM demo at `https://opensource-demo.orangehrmlive.com`.
 
+[GitHub Actions](https://github.com/melv-narrow/orange-hrm-live/actions) runs the suite on every push and manual dispatch, and the trend-enabled Allure report is published to [GitHub Pages](https://melv-narrow.github.io/orange-hrm-live/).
+
 ## Coverage strategy
 
 The suite follows a lightweight ISTQB-aligned structure:
@@ -37,7 +39,17 @@ npm run test:headed
 npm run test:public
 npm run test:app
 npm run report
+npm run allure:open
 ```
+
+What happens automatically:
+
+- `npm test` clears old local artifacts before each run.
+- Playwright HTML results are always generated in `playwright-report/`.
+- Allure raw results are always generated in `allure-results/`.
+- `npm run allure:open` generates and opens the Allure HTML report locally.
+
+Note: local Allure HTML generation uses the Allure CLI and requires Java on the machine. The hosted GitHub Pages report does not require any local setup beyond `npm test`.
 
 ## Environment variables
 
@@ -52,3 +64,4 @@ Override them if the demo credentials change.
 
 - The demo site is an external shared environment, so the config uses a single worker and retry support to reduce noise.
 - Authenticated tests reuse a Playwright storage state created by `tests/setup/auth.setup.ts`.
+- The GitHub Actions workflow publishes Allure history to `gh-pages`, so trends persist across successful and failed CI runs.

@@ -1,0 +1,107 @@
+name: CI and Allure
+
+on:
+  push:
+    branches-ignore:
+      - gh-pages
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-allure-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  ALLURE_REPORT_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+
+jobs:
+  test-and-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright suite
+        run: npm test
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.run_number }}
+          path: allure-results
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Load previous Allure history
+        if: always()
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build Allure report with history
+        if: always()
+        uses: simple-elf/allure-report-action@v1.13
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          allure_history: allure-history
+          gh_pages: gh-pages
+          keep_reports: 30
+          report_name: OrangeHRM Live Demo Report
+          report_url: ${{ env.ALLURE_REPORT_URL }}
+
+      - name: Publish Allure report to GitHub Pages branch
+        if: always() && github.ref_name == github.event.repository.default_branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+          enable_jekyll: false
+
+      - name: Add workflow summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Test Reporting"
+            echo
+            echo "- Playwright HTML report artifact: \`playwright-report-${{ github.run_number }}\`"
+            echo "- Allure results artifact: \`allure-results-${{ github.run_number }}\`"
+            if [[ "${{ github.ref_name }}" == "${{ github.event.repository.default_branch }}" ]]; then
+              echo "- Hosted Allure report: [${ALLURE_REPORT_URL}](${ALLURE_REPORT_URL})"
+            else
+              echo "- Hosted Allure report updates only from the default branch (\`${{ github.event.repository.default_branch }}\`)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
