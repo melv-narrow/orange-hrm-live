@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: ci-allure-${{ github.ref }}
+  group: ci-allure-${{ github.ref }}-${{ github.event_name }}-${{ inputs.suite || 'default' }}
   cancel-in-progress: true
 
 env:
@@ -108,7 +108,7 @@ jobs:
   publish-report:
     name: publish-report
     needs: test-suite
-    if: always()
+    if: ${{ always() && needs.test-suite.result != 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
