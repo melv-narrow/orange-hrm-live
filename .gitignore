@@ -1,7 +1,9 @@
 allure-history/
 allure-report/
 allure-results/
+.eslintcache
 node_modules/
+pages-site/
 playwright-report/
 test-results/
 playwright/.auth/*.json

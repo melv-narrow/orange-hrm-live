@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 export class AppShellPage {
   readonly sidePanel: Locator;
@@ -7,7 +8,9 @@ export class AppShellPage {
 
   constructor(private readonly page: Page) {
     this.sidePanel = page.getByRole('navigation', { name: 'Sidepanel' });
-    this.sidePanelSearch = this.sidePanel.getByRole('textbox', { name: 'Search' });
+    this.sidePanelSearch = this.sidePanel.getByRole('textbox', {
+      name: 'Search',
+    });
     this.userDropdown = page.locator('.oxd-userdropdown-tab');
   }
 
@@ -25,5 +28,11 @@ export class AppShellPage {
 
   async openUserMenu(): Promise<void> {
     await this.userDropdown.click();
+  }
+
+  async logout(): Promise<void> {
+    await this.openUserMenu();
+    await expect(this.userMenuItem('Logout')).toBeVisible();
+    await this.userMenuItem('Logout').click();
   }
 }

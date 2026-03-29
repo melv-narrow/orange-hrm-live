@@ -14,7 +14,13 @@ export interface ModuleExpectation {
 export const BASE_URL = 'https://opensource-demo.orangehrmlive.com';
 export const LOGIN_PATH = '/web/index.php/auth/login';
 export const DASHBOARD_PATH = '/web/index.php/dashboard/index';
-export const PASSWORD_RESET_PATH = '/web/index.php/auth/requestPasswordResetCode';
+export const PASSWORD_RESET_PATH =
+  '/web/index.php/auth/requestPasswordResetCode';
+export const ADMIN_USERS_PATH = '/web/index.php/admin/viewSystemUsers';
+export const DIRECTORY_PATH = '/web/index.php/directory/viewDirectory';
+export const BUZZ_PATH = '/web/index.php/buzz/viewBuzz';
+export const ASSIGN_LEAVE_PATH = '/web/index.php/leave/assignLeave';
+export const MY_TIMESHEET_PATH = '/web/index.php/time/viewMyTimesheet';
 export const AUTH_STATE_PATH = 'playwright/.auth/orange-hrm-admin.json';
 
 export const APP_CREDENTIALS: Credentials = {
@@ -56,7 +62,12 @@ export const MODULE_EXPECTATIONS: ModuleExpectation[] = [
     expectedUrl: /\/web\/index\.php\/pim\/viewEmployeeList$/,
     heading: 'PIM',
     buttons: ['Reset', 'Search'],
-    labels: ['Employee Name', 'Employee Id', 'Employment Status', 'Supervisor Name'],
+    labels: [
+      'Employee Name',
+      'Employee Id',
+      'Employment Status',
+      'Supervisor Name',
+    ],
   },
   {
     menuItem: 'Leave',

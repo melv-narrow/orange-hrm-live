@@ -19,9 +19,13 @@ export class LoginPage {
     this.usernameInput = page.getByPlaceholder('Username');
     this.passwordInput = page.getByPlaceholder('Password');
     this.loginButton = page.getByRole('button', { name: 'Login' });
-    this.forgotPasswordLink = page.getByText('Forgot your password?', { exact: true });
+    this.forgotPasswordLink = page.getByText('Forgot your password?', {
+      exact: true,
+    });
     this.demoCredentialsPanel = page.locator('.orangehrm-demo-credentials');
-    this.invalidCredentialsAlert = page.getByText('Invalid credentials', { exact: true });
+    this.invalidCredentialsAlert = page.getByText('Invalid credentials', {
+      exact: true,
+    });
     this.requiredMessages = page.getByText('Required', { exact: true });
   }
 

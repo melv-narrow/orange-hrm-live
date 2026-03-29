@@ -1,30 +1,52 @@
 # OrangeHRM Live Demo Test Suite
 
-This repository contains a Playwright + TypeScript regression suite for the live OrangeHRM demo at `https://opensource-demo.orangehrmlive.com`.
+[![CI and Allure](https://github.com/melv-narrow/orange-hrm-live/actions/workflows/ci-allure.yml/badge.svg)](https://github.com/melv-narrow/orange-hrm-live/actions/workflows/ci-allure.yml)
+[![Allure Report](https://img.shields.io/badge/Allure%20Report-Live-orange?logo=allure)](https://melv-narrow.github.io/orange-hrm-live/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-[GitHub Actions](https://github.com/melv-narrow/orange-hrm-live/actions) runs the suite on every push and manual dispatch, and the trend-enabled Allure report is published to [GitHub Pages](https://melv-narrow.github.io/orange-hrm-live/).
+Playwright + TypeScript showcase suite for the live [OrangeHRM demo](https://opensource-demo.orangehrmlive.com/web/index.php/auth/login), built with Playwright best practices, TypeScript-first page objects, and ISTQB-minded coverage design.
+
+The repository runs frictionless CI on every push, supports smoke or full execution from GitHub Actions, and continuously publishes a trend-enabled Allure report to GitHub Pages.
+
+## Live artifacts
+
+- GitHub Actions: [Workflow runs](https://github.com/melv-narrow/orange-hrm-live/actions)
+- Hosted Allure report: [melv-narrow.github.io/orange-hrm-live](https://melv-narrow.github.io/orange-hrm-live/)
+- Repository: [melv-narrow/orange-hrm-live](https://github.com/melv-narrow/orange-hrm-live)
+
+## Showcase
+
+![OrangeHRM login page](./docs/assets/orangehrm-login.png)
+
+![Hosted Allure report](./docs/assets/allure-report.png)
 
 ## Coverage strategy
 
-The suite follows a lightweight ISTQB-aligned structure:
+The suite is intentionally layered around stable, business-relevant coverage:
 
-- Smoke coverage for the most business-critical flows.
-- Positive and negative checks for login and password recovery.
-- Basic access-control coverage for protected routes.
-- Authenticated navigation checks for stable, high-value modules.
-- Assertions focused on deterministic UI behavior instead of brittle demo data.
+- `@smoke` tests for the highest-value user journeys on push.
+- `@regression` tests for broader authenticated and negative-path coverage.
+- Positive, negative, and access-control checks around authentication.
+- Stable post-login module coverage for Dashboard, Admin, PIM, Leave, Directory, and Buzz.
+- Security-oriented checks for logout protection and cleared-session redirects.
+- Assertions biased toward deterministic UI behavior instead of brittle shared-demo data assumptions.
 
-## Test areas
+## CI/CD and reporting
 
-- Public login page rendering and validation.
-- Successful and unsuccessful authentication.
-- Password reset navigation and validation.
-- Dashboard readiness after login.
-- Side-menu filtering.
-- Logout.
-- Admin, PIM, Leave, Directory, and Buzz landing-page smoke checks.
+The GitHub Actions workflow in `.github/workflows/ci-allure.yml` runs in three modes:
 
-## Run the suite
+- `push`: runs the smoke suite for fast feedback.
+- `workflow_dispatch`: lets you choose `smoke` or `full`.
+- `schedule`: runs the full suite nightly at `00:00 UTC` (which is `02:00` in `Africa/Johannesburg`).
+
+Allure is wired in as a first-class reporter:
+
+- Raw results are generated on every execution.
+- Historical trend data is restored from `gh-pages` before each report build.
+- The rebuilt report is published back to GitHub Pages after successful full runs on `main`.
+- Workflow summaries include suite mode, executed command, artifact names, and result totals.
+
+## Local usage
 
 ```bash
 npm install
@@ -32,36 +54,53 @@ npx playwright install chromium
 npm test
 ```
 
-Helpful variants:
+Helpful commands:
 
 ```bash
-npm run test:headed
+npm run test:smoke
+npm run test:regression
 npm run test:public
 npm run test:app
+npm run test:headed
+npm run lint
+npm run format:check
 npm run report
 npm run allure:open
 ```
 
 What happens automatically:
 
-- `npm test` clears old local artifacts before each run.
-- Playwright HTML results are always generated in `playwright-report/`.
-- Allure raw results are always generated in `allure-results/`.
-- `npm run allure:open` generates and opens the Allure HTML report locally.
+- `npm test` clears prior local reports before each run.
+- Playwright HTML output is generated in `playwright-report/`.
+- Allure raw output is generated in `allure-results/`.
+- `npm run allure:generate` restores local history, builds the report, and saves updated history for the next run.
 
-Note: local Allure HTML generation uses the Allure CLI and requires Java on the machine. The hosted GitHub Pages report does not require any local setup beyond `npm test`.
+Note: local Allure HTML viewing uses the Allure CLI and requires Java. The hosted GitHub Pages report does not require any local Java setup.
+
+## Project structure
+
+```text
+src/
+  config/       runtime constants and test data
+  pages/        page objects and reusable UI helpers
+tests/
+  app/          authenticated smoke and regression coverage
+  public/       unauthenticated coverage
+  setup/        storage-state authentication bootstrap
+  support/      Allure metadata helpers
+```
 
 ## Environment variables
 
-The suite defaults to the public demo credentials shown on the page:
+The suite defaults to the public demo credentials displayed on the login page:
 
-- `ORANGE_HRM_USERNAME` defaults to `Admin`
-- `ORANGE_HRM_PASSWORD` defaults to `admin123`
+- `ORANGE_HRM_USERNAME=Admin`
+- `ORANGE_HRM_PASSWORD=admin123`
 
 Override them if the demo credentials change.
 
 ## Notes
 
-- The demo site is an external shared environment, so the config uses a single worker and retry support to reduce noise.
-- Authenticated tests reuse a Playwright storage state created by `tests/setup/auth.setup.ts`.
-- The GitHub Actions workflow publishes Allure history to `gh-pages`, so trends persist across successful and failed CI runs.
+- The target is a shared external environment, so the suite runs with a single worker and retry support to reduce noise.
+- Authenticated coverage reuses a Playwright storage state created in `tests/setup/auth.setup.ts`.
+- Security tests create isolated browser contexts so logout and session-expiry checks are not coupled to the shared authenticated fixture state.
