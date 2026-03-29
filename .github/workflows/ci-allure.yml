@@ -16,6 +16,7 @@ concurrency:
 env:
   NODE_VERSION: '22'
   ALLURE_REPORT_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   test-and-report:
@@ -83,12 +84,20 @@ jobs:
 
       - name: Publish Allure report to GitHub Pages branch
         if: always() && github.ref_name == github.event.repository.default_branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
-          enable_jekyll: false
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -rf allure-history/.git
+          touch allure-history/.nojekyll
+          cd allure-history
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git commit -m "Publish Allure report for run ${{ github.run_number }}"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          git push --force origin gh-pages
 
       - name: Add workflow summary
         if: always()
