@@ -1,0 +1,24 @@
+{
+  "name": "orange-hrm-live",
+  "version": "1.0.0",
+  "description": "Playwright + TypeScript regression suite for the OrangeHRM live demo",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:public": "playwright test --project=public-chromium",
+    "test:app": "playwright test --project=authenticated-chromium",
+    "report": "playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "orangehrm",
+    "e2e"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}
