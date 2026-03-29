@@ -88,9 +88,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          rm -rf allure-history/.git
-          touch allure-history/.nojekyll
-          cd allure-history
+          rm -rf pages-site
+          mkdir -p pages-site
+          rsync -a --delete --exclude '.git' allure-history/ pages-site/
+          touch pages-site/.nojekyll
+          cd pages-site
           git init -b gh-pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
