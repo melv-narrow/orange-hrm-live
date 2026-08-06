@@ -113,6 +113,18 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
@@ -131,16 +143,17 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
+      - name: Restore cached Allure history
+        shell: bash
+        run: |
+          mkdir -p allure-history
+          if [[ -d gh-pages/last-history ]]; then
+            rm -rf allure-history/last-history
+            cp -R gh-pages/last-history allure-history/last-history
+          fi
+
       - name: Build Allure report with history
-        uses: simple-elf/allure-report-action@v1.13
-        with:
-          allure_results: allure-results
-          allure_report: allure-report
-          allure_history: allure-history
-          gh_pages: gh-pages
-          keep_reports: 30
-          report_name: OrangeHRM Live Demo Report
-          report_url: ${{ env.ALLURE_REPORT_URL }}
+        run: npm run allure:generate
 
       - name: Upload Allure HTML report
         if: always()
