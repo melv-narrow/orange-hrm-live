@@ -46,7 +46,6 @@ export const CRITICAL_MENU_ITEMS = [
   'Leave',
   'Dashboard',
   'Directory',
-  'Buzz',
 ] as const;
 
 export const MODULE_EXPECTATIONS: ModuleExpectation[] = [
