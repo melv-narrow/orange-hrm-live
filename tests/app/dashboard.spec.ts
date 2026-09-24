@@ -34,9 +34,11 @@ test.describe('Authenticated dashboard coverage', () => {
     await dashboardPage.goto();
     await dashboardPage.expectLoaded();
 
-    for (const menuItem of CRITICAL_MENU_ITEMS) {
-      await expect(appShellPage.menuItem(menuItem)).toBeVisible();
-    }
+    await test.step('Verify critical side navigation items', async () => {
+      for (const menuItem of CRITICAL_MENU_ITEMS) {
+        await expect(appShellPage.menuItem(menuItem)).toBeVisible();
+      }
+    });
 
     for (const widget of CORE_DASHBOARD_WIDGETS) {
       await expect(dashboardPage.widgetHeading(widget)).toBeVisible();
